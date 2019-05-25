@@ -1,1 +1,8 @@
-
+spring:
+  profiles:
+    active: @activeProfile@
+  application:
+    name: @artifactId@-@activeProfile@
+  jackson:
+    serialization:
+      write_date_timestamps_as_nanoseconds: false

@@ -28,6 +28,42 @@
         <url>https://github.com/leochans/spring-boot-rest-example</url>
     </scm>
 
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <activeProfile>dev</activeProfile>
+            </properties>
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <activeProfile>test</activeProfile>
+            </properties>
+        </profile>
+        <profile>
+            <id>rc</id>
+            <properties>
+                <activeProfile>rc</activeProfile>
+            </properties>
+        </profile>
+        <profile>
+            <id>gray</id>
+            <properties>
+                <activeProfile>gray</activeProfile>
+            </properties>
+        </profile>
+        <profile>
+            <id>pro</id>
+            <properties>
+                <activeProfile>pro</activeProfile>
+            </properties>
+        </profile>
+    </profiles>
+
     <properties>
         <java.version>1.8</java.version>
     </properties>
@@ -51,6 +87,7 @@
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}-${activeProfile}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

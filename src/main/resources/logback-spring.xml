@@ -1,0 +1,44 @@
+<configuration>
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="app"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS}[%-5p][%t] %c{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/${APP_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- rollover daily -->
+            <fileNamePattern>logs/backup/${APP_NAME}-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <!-- <maxFileSize>10MB</maxFileSize> -->
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}[%-5p][%t] %c{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <logger name="chapters.configuration" level="INFO" />
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.eclipse.jetty" level="WARN"/>
+    <logger name="org.eclipse.jetty.util.log" level="ERROR"/>
+    <logger name="org.eclipse.jetty.util.component" level="ERROR"/>
+    <logger name="com.amazonaws" level="WARN"/>
+
+    <root level="INFO">
+        <springProfile name="dev">
+        <appender-ref ref="STDOUT" />
+        </springProfile>
+        <springProfile name="!dev">
+        <appender-ref ref="ASYNC_FILE" level="INFO" />
+        </springProfile>
+    </root>
+
+</configuration>
