@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.exception.DemoException;
+import com.example.demo.model.OrderType;
 import com.example.demo.model.TradeOrder;
 import com.example.demo.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -77,11 +78,16 @@ public class DemoController {
     /**
      * query all order.
      *
+     * @param type order type of value ["BUY", "SELL"]
      * @return list of {@link TradeOrder}
      */
     @GetMapping("order")
-    public List<TradeOrder> queryAllOrder() {
-        return orderService.queryAll();
+    public List<TradeOrder> queryAllOrder(@RequestParam(value = "type", required = false) OrderType type) {
+        if (null == type) {
+            return orderService.queryAll();
+        } else {
+            return orderService.queryOrderByType(type);
+        }
     }
 
     @GetMapping("today")

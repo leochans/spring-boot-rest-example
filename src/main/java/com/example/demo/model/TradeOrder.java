@@ -16,4 +16,5 @@ public class TradeOrder {
     private Float price;
     private Integer amount;
     private LocalDateTime date;
+    private OrderType type;
 }
