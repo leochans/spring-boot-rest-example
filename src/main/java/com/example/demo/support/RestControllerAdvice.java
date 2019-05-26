@@ -18,12 +18,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-import java.util.Collection;
-import java.util.List;
-
-
 /**
- * 对所有异常的拦截及统一处理.
+ * rest api common support config.
  *
  * @author yuan.cheng
  */
@@ -31,11 +27,11 @@ import java.util.List;
 @ControllerAdvice
 public class RestControllerAdvice implements ResponseBodyAdvice<Object> {
 
-    private static final int RUN_TIME_ERROR_CODE = 70_000;
-    private static final String RUN_TIME_ERROR_MESSAGE = "Some thing totally wrong!";
-
     /**
-     * handler the StockHqException.
+     * handler the declare exception define in project.
+     * <p>
+     *     this kind exceptions define for business error, so response 200 with error message
+     * </p>
      *
      * @param ex target exception {@link DemoException}
      * @return {@link JsonResult}
@@ -47,32 +43,59 @@ public class RestControllerAdvice implements ResponseBodyAdvice<Object> {
         return JsonResult.build(ex.getErrorCode(), ex.getErrorMsg());
     }
 
+    /**
+     * handle wrong query parameter.
+     *
+     * <p>
+     *     this exception indicate that client pass a wrong parameter, so response 400 for client error
+     * </p>
+     *
+     * @param ex of type {@link MethodArgumentTypeMismatchException}
+     * @return failed {@link JsonResult} with specific code and message
+     */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public JsonResult handleWrongArgument(MethodArgumentTypeMismatchException ex) {
-        return JsonResult.build(400, String.format("wrong parameter [%s]", ex.getName()));
+        return JsonResult.build(HttpStatus.BAD_REQUEST.value(),
+            String.format("wrong value['%s'] for parameter['%s']", ex.getValue(), ex.getName()));
     }
 
+    /**
+     * handle json type request body parse error.
+     *
+     * <p>
+     *    this exception indicate that client pass a wrong request body, so response 400 for client error
+     * </p>
+     *
+     * @param ex of type {@link HttpMessageNotReadableException}
+     * @return failed {@link JsonResult} with specific code and message
+     */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public JsonResult handleWrongBody(HttpMessageNotReadableException ex) {
-        return JsonResult.build(400, ex.getMessage());
+        return JsonResult.build(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
     /**
      * handler the RuntimeException.
      *
+     * <p>
+     *     finally in the end handle all the undeclared run time exception, print error log and response 500 for server
+     *     error then client will know server's status and deal with this situation correctly
+     * </p>
+     *
      * @param ex target exception {@link RuntimeException}
      * @return {@link JsonResult}
      */
     @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public JsonResult handleRuntimeException(RuntimeException ex) {
         log.error(ex.getMessage(), ex);
-        return JsonResult.build(RUN_TIME_ERROR_CODE, RUN_TIME_ERROR_MESSAGE);
+        return JsonResult.build(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
     }
 
     @Override
@@ -80,7 +103,6 @@ public class RestControllerAdvice implements ResponseBodyAdvice<Object> {
         return MappingJackson2HttpMessageConverter.class.isAssignableFrom(converterType);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Object beforeBodyWrite(Object resultData, MethodParameter methodParameter, MediaType mediaType,
                                   Class<? extends HttpMessageConverter<?>> clazz, ServerHttpRequest serverHttpRequest,
@@ -91,10 +113,6 @@ public class RestControllerAdvice implements ResponseBodyAdvice<Object> {
             Object body = result.getValue();
             result.setValue(JsonResult.build(body));
             return result;
-        }
-
-        if (resultData instanceof Collection) {
-            return JsonResult.build(new ListResult<Object>((List) resultData));
         }
 
         return JsonResult.build(resultData);

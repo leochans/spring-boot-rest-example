@@ -5,4 +5,4 @@ spring:
     name: @artifactId@-@activeProfile@
   jackson:
     serialization:
-      write_date_timestamps_as_nanoseconds: false
+      write_date_timestamps_as_nanoseconds: false # serialize LocalDateTime with ISO local date time format

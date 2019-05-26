@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 /**
@@ -24,13 +26,19 @@ import java.util.List;
 public class DemoController {
     private final OrderService orderService;
 
+    /**
+     * will return plain text with Content-Type text/plain.
+     *
+     * @param name who you will say hello to
+     * @return greeting text
+     */
     @GetMapping("/hello")
     public String hello(@RequestParam(value = "name", required = false, defaultValue = "world") String name) {
         return "hello " + name;
     }
 
     /**
-     * order query.
+     * query order by id.
      *
      * @param id id for order
      * @return {@link TradeOrder}
@@ -40,11 +48,26 @@ public class DemoController {
         return orderService.queryOrder(id);
     }
 
+    /**
+     * add an order.
+     *
+     * @param tradeOrder {@link TradeOrder}
+     * @return added {@link TradeOrder}
+     * @throws DemoException throw when error occur
+     */
     @PutMapping("order")
     public TradeOrder addOrder(@RequestBody TradeOrder tradeOrder) throws DemoException {
         return orderService.addOrder(tradeOrder);
     }
 
+    /**
+     * modify an order.
+     *
+     * @param id order's id
+     * @param tradeOrder {@link TradeOrder}
+     * @return modified {@link TradeOrder}
+     * @throws DemoException throw when error occur
+     */
     @PostMapping("order/{id}")
     public TradeOrder modifyOrder(@PathVariable("id") int id, @RequestBody TradeOrder tradeOrder) throws DemoException {
         tradeOrder.setId(id);
@@ -61,6 +84,19 @@ public class DemoController {
         return orderService.queryAll();
     }
 
+    @GetMapping("today")
+    public LocalDate today() {
+        return LocalDate.now();
+    }
+
+    @GetMapping("time")
+    public LocalTime time() {
+        return LocalTime.now();
+    }
+
+    /**
+     * return empty response body.
+     */
     @GetMapping("status")
     public void status() {
         // nothing to return

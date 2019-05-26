@@ -1,58 +1,101 @@
 package com.example.demo.support;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
+import java.util.Collection;
 
 /**
- * 虚拟交易接口返回对象框架，具体的数据在data里，用实现ResultData的对象.
+ * json result for generic object.
  *
- * @param <T> 模板类型
+ * <p>
+ *     unified json format response with the form of
+ *     <pre>
+ *         {"code" : 0,
+ *          "msg" : "success",
+ *          "data" : {
+ *              ...
+ *          }
+ *         }
+ *     </pre>
+ *     for object result and
+ *     <pre>
+ *         {"code" : 0,
+ *          "msg" : "success",
+ *          "data" : {
+ *           "items" : [
+ *              ...
+ *              ]
+ *          }
+ *         }
+ *     </pre>
+ *     for list result and
+ *     <pre>
+ *         {"code" : 70000,
+ *          "msg" : "Some thing wrong in server!",
+ *          "data" : {}
+ *         }
+ *     </pre>
+ *     for error
+ * </p>
+ *
  * @author yuan.cheng
  */
 @Data
-class JsonResult<T> {
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+final class JsonResult {
     /**
-     * 0,成功;其他为失败
+     * 0 for success other for failed
      */
     private static final int CODE_SUCCESS = 0;
+    private static final String MSG_SUCCESS = "success";
+
+    private final int code;
+    private final String msg;
+    private final Object data;
 
     /**
-     * 默认为成功
-     */
-    private int code = CODE_SUCCESS;
-    private String msg = "";
-    private T data;
-
-    /**
-     * 封装一个正常的返回对象.
+     * wrapper a object for success result.
      *
      * @param resultData result object
      * @return {@link JsonResult}
      */
     static JsonResult build(Object resultData) {
-        JsonResult<Object> result = new JsonResult<>();
-        result.setData(resultData);
-        return result;
+        if (resultData instanceof Collection) {
+            return new JsonResult(CODE_SUCCESS, MSG_SUCCESS, new ListResult((Collection) resultData));
+        }
+        return new JsonResult(CODE_SUCCESS, MSG_SUCCESS, resultData);
     }
 
     /**
-     * 封装返回一个指定的对象.
+     * specify code and msg for result.
      *
      * @param code int value of return code
      * @param msg  String value of message
      * @return {@link JsonResult}
      */
     static JsonResult build(int code, String msg) {
-        JsonResult<EmptyObject> result = new JsonResult<>();
-        result.setCode(code);
-        result.setMsg(msg);
-        result.setData(new EmptyObject());
-        return result;
+        return new JsonResult(code, msg, new EmptyObject());
     }
 
     /**
-     * 封装返回一个成功的对象.
+     * EmptyObject.
+     *
+     * @author yuan.cheng
      */
-    static JsonResult buildSuccess() {
-        return JsonResult.build(CODE_SUCCESS, "successful");
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    private static final class EmptyObject {
+    }
+
+    /**
+     * collection based type wrapper result.
+     *
+     * @author yuan.cheng
+     */
+    @Data
+    private static final class ListResult {
+        private final Collection items;
     }
 }
