@@ -3,24 +3,28 @@ package com.example.demo.controller;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.demo.exception.DemoException;
 import com.example.demo.model.OrderType;
 import com.example.demo.model.TradeOrder;
 import com.example.demo.service.OrderService;
-import org.hamcrest.CustomTypeSafeMatcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.ResourceUtils;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 
 @RunWith(SpringRunner.class)
@@ -33,6 +37,9 @@ public class DemoControllerTest {
     @MockBean
     private OrderService orderService;
 
+    private String loadJson(String fileName) throws IOException {
+        return new String(Files.readAllBytes(ResourceUtils.getFile("classpath:" + fileName).toPath()));
+    }
 
     @Test
     public void hello() throws Exception {
@@ -42,28 +49,28 @@ public class DemoControllerTest {
 
     @Test
     public void queryOrder() throws Exception {
-        TradeOrder expect = new TradeOrder();
-        expect.setId(1);
-        expect.setSummary("demo tradeOrder");
-        expect.setDate(LocalDateTime.now());
-        expect.setType(OrderType.SELL);
-        when(orderService.queryOrder(1)).thenReturn(expect);
+        TradeOrder order = new TradeOrder();
+        order.setId(1);
+        order.setSummary("demo tradeOrder");
+        order.setDate(LocalDateTime.of(2019, 3, 14, 7, 58, 19, 111 * 1000000));
+        order.setType(OrderType.SELL);
+        when(orderService.queryOrder(1)).thenReturn(order);
         this.mockMvc.perform(get("/order/1"))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(content().json("{\"code\":0,\"msg\":\"success\",\"data\":{\"id\":1,\"summary\":\"demo tradeOrder\", \"type\":\"SELL\",\"price\":null, \"amount\":null}}", false))
-            .andExpect(jsonPath("$.data.date", new CustomTypeSafeMatcher<String>("date of format yyyy-MM-ddTHH:mm:ss.SSS") {
-                @Override
-                protected boolean matchesSafely(String item) {
-                    return item.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.?\\d?\\d?\\d?");
-                }
-            }));
-
+            .andExpect(content().json(loadJson("queryOrder.json"), true));
     }
 
     @Test
-    public void addOrder() {
+    public void addOrder() throws Exception {
+        when(orderService.addOrder(ArgumentMatchers.any(TradeOrder.class)))
+            .thenThrow((new DemoException(100, "add order error")));
+        this.mockMvc.perform(put("/order").contentType(MediaType.APPLICATION_JSON).content("{\"id\":0}"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(content().json("{\"code\":0,\"msg\":\"success\",\"data\":{}}"));
     }
 
     @Test
