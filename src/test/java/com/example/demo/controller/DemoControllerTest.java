@@ -3,9 +3,11 @@ package com.example.demo.controller;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.demo.exception.DemoException;
@@ -74,7 +76,16 @@ public class DemoControllerTest {
     }
 
     @Test
-    public void modifyOrder() {
+    public void modifyOrder() throws Exception {
+        TradeOrder order = new TradeOrder();
+        order.setId(1);
+        order.setSummary("demo tradeOrder");
+        when(orderService.modifyOrder(order)).thenReturn(order);
+        this.mockMvc.perform(post("/order/1").contentType(MediaType.APPLICATION_JSON).content("{\"summary\":\"demo tradeOrder\"}"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(jsonPath("$.data.summary").value("demo tradeOrder"));
     }
 
     @Test
