@@ -28,6 +28,7 @@ import org.springframework.util.ResourceUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
+import java.util.Collections;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(DemoController.class)
@@ -89,7 +90,17 @@ public class DemoControllerTest {
     }
 
     @Test
-    public void queryAllOrder() {
+    public void queryAllOrder() throws Exception {
+        TradeOrder order = new TradeOrder();
+        order.setId(1);
+        order.setSummary("demo tradeOrder");
+        order.setDate(LocalDateTime.of(2019, 3, 14, 7, 58, 19, 111 * 1000000));
+        order.setType(OrderType.SELL);
+        when(orderService.queryOrderByType(OrderType.SELL)).thenReturn(Collections.singletonList(order));
+        this.mockMvc.perform(get("/order").param("type","SELL"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(content().json(loadJson("orderList.json"), true));
     }
 
     @Test
