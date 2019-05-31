@@ -103,6 +103,9 @@
         </profile>
         <profile>
             <id>coverage</id>
+            <properties>
+                <activeProfile>dev</activeProfile>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
