@@ -14,6 +14,7 @@ import com.example.demo.exception.DemoException;
 import com.example.demo.model.OrderType;
 import com.example.demo.model.TradeOrder;
 import com.example.demo.service.OrderService;
+import org.hamcrest.CustomTypeSafeMatcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -97,21 +98,60 @@ public class DemoControllerTest {
         order.setDate(LocalDateTime.of(2019, 3, 14, 7, 58, 19, 111 * 1000000));
         order.setType(OrderType.SELL);
         when(orderService.queryOrderByType(OrderType.SELL)).thenReturn(Collections.singletonList(order));
-        this.mockMvc.perform(get("/order").param("type","SELL"))
+        this.mockMvc.perform(get("/order").param("type", "SELL"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
             .andExpect(content().json(loadJson("orderList.json"), true));
     }
 
     @Test
-    public void today() {
+    public void today() throws Exception {
+        this.mockMvc.perform(get("/today"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(jsonPath("$.data").value(
+                new CustomTypeSafeMatcher<String>("date of format yyyy-MM-dd") {
+                    @Override
+                    protected boolean matchesSafely(String item) {
+                        return item.matches("\\d{4}-\\d{2}-\\d{2}");
+                    }
+                }
+            ));
     }
 
     @Test
-    public void time() {
+    public void time() throws Exception {
+        this.mockMvc.perform(get("/time"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(jsonPath("$.data").value(
+                new CustomTypeSafeMatcher<String>("time of format HH:mm:ss.SSS") {
+                    @Override
+                    protected boolean matchesSafely(String item) {
+                        return item.matches("\\d{2}:\\d{2}:\\d{2}\\.?\\d?\\d?\\d?");
+                    }
+                }
+            ));
     }
 
     @Test
-    public void statusTest() {
+    public void now() throws Exception {
+        this.mockMvc.perform(get("/now"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+            .andExpect(jsonPath("$.data").value(
+                new CustomTypeSafeMatcher<String>("dateTime of format yyyy-MM-ddTHH:mm:ss.SSS") {
+                    @Override
+                    protected boolean matchesSafely(String item) {
+                        return item.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.?\\d?\\d?\\d?");
+                    }
+                }
+            ));
+    }
+
+    @Test
+    public void statusTest() throws Exception {
+        this.mockMvc.perform(get("/status"))
+            .andExpect(status().isOk());
     }
 }

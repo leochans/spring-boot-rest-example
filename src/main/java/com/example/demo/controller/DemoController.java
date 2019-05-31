@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -98,6 +99,11 @@ public class DemoController {
     @GetMapping("time")
     public LocalTime time() {
         return LocalTime.now();
+    }
+
+    @GetMapping("now")
+    public LocalDateTime now() {
+        return LocalDateTime.now();
     }
 
     /**
