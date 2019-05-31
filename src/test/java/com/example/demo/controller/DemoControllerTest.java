@@ -125,7 +125,7 @@ public class DemoControllerTest {
                 new CustomTypeSafeMatcher<String>("time of format HH:mm:ss.SSS") {
                     @Override
                     protected boolean matchesSafely(String item) {
-                        return item.matches("\\d{2}:\\d{2}:\\d{2}\\.?\\d?\\d?\\d?");
+                        return item.matches("\\d{2}:\\d{2}:\\d{2}\\.?\\d*");
                     }
                 }
             ));
