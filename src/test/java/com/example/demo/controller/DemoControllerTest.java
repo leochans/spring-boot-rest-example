@@ -47,7 +47,7 @@ public class DemoControllerTest {
 
     @Test
     public void hello() throws Exception {
-        this.mockMvc.perform(get("/hello")).andDo(print()).andExpect(status().isOk())
+        this.mockMvc.perform(get("/hello")).andExpect(status().isOk())
             .andExpect(content().string(containsString("hello world")));
     }
 
@@ -60,7 +60,6 @@ public class DemoControllerTest {
         order.setType(OrderType.SELL);
         when(orderService.queryOrder(1)).thenReturn(order);
         this.mockMvc.perform(get("/order/1"))
-            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
             .andExpect(content().json(loadJson("queryOrder.json"), true));
@@ -71,7 +70,6 @@ public class DemoControllerTest {
         when(orderService.addOrder(ArgumentMatchers.any(TradeOrder.class)))
             .thenThrow((new DemoException(100, "add order error")));
         this.mockMvc.perform(put("/order").contentType(MediaType.APPLICATION_JSON).content("{\"id\":0}"))
-            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
             .andExpect(content().json("{\"code\":0,\"msg\":\"success\",\"data\":{}}"));
@@ -84,7 +82,6 @@ public class DemoControllerTest {
         order.setSummary("demo tradeOrder");
         when(orderService.modifyOrder(order)).thenReturn(order);
         this.mockMvc.perform(post("/order/1").contentType(MediaType.APPLICATION_JSON).content("{\"summary\":\"demo tradeOrder\"}"))
-            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
             .andExpect(jsonPath("$.data.summary").value("demo tradeOrder"));
@@ -143,7 +140,7 @@ public class DemoControllerTest {
                 new CustomTypeSafeMatcher<String>("dateTime of format yyyy-MM-ddTHH:mm:ss.SSS") {
                     @Override
                     protected boolean matchesSafely(String item) {
-                        return item.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.?\\d?\\d?\\d?");
+                        return item.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.?\\d*");
                     }
                 }
             ));
