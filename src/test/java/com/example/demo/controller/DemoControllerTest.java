@@ -35,6 +35,9 @@ import java.util.Collections;
 @WebMvcTest(DemoController.class)
 public class DemoControllerTest {
 
+    private static final String DATE_PATTERN = "\\d{4}-\\d{2}-\\d{2}";
+    private static final String TIME_PATTERN = "\\d{2}:\\d{2}:\\d{2}\\.?\\d*";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -110,7 +113,7 @@ public class DemoControllerTest {
                 new CustomTypeSafeMatcher<String>("date of format yyyy-MM-dd") {
                     @Override
                     protected boolean matchesSafely(String item) {
-                        return item.matches("\\d{4}-\\d{2}-\\d{2}");
+                        return item.matches(DATE_PATTERN);
                     }
                 }
             ));
@@ -125,7 +128,7 @@ public class DemoControllerTest {
                 new CustomTypeSafeMatcher<String>("time of format HH:mm:ss.SSS") {
                     @Override
                     protected boolean matchesSafely(String item) {
-                        return item.matches("\\d{2}:\\d{2}:\\d{2}\\.?\\d*");
+                        return item.matches(TIME_PATTERN);
                     }
                 }
             ));
@@ -140,7 +143,7 @@ public class DemoControllerTest {
                 new CustomTypeSafeMatcher<String>("dateTime of format yyyy-MM-ddTHH:mm:ss.SSS") {
                     @Override
                     protected boolean matchesSafely(String item) {
-                        return item.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.?\\d*");
+                        return item.matches(DATE_PATTERN + "T" + TIME_PATTERN);
                     }
                 }
             ));
