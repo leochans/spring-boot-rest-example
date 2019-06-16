@@ -6,11 +6,11 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -27,6 +27,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 @ControllerAdvice
 public class RestControllerAdvice implements ResponseBodyAdvice<Object> {
 
+    private static final String PROJECT_BASE_PACKAGE = "com.example.demo";
     /**
      * handler the declare exception define in project.
      * <p>
@@ -62,23 +63,6 @@ public class RestControllerAdvice implements ResponseBodyAdvice<Object> {
     }
 
     /**
-     * handle json type request body parse error.
-     *
-     * <p>
-     *    this exception indicate that client pass a wrong request body, so response 400 for client error
-     * </p>
-     *
-     * @param ex of type {@link HttpMessageNotReadableException}
-     * @return failed {@link JsonResult} with specific code and message
-     */
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public JsonResult handleWrongBody(HttpMessageNotReadableException ex) {
-        return JsonResult.build(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
-    }
-
-    /**
      * handler the RuntimeException.
      *
      * <p>
@@ -100,14 +84,19 @@ public class RestControllerAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return MappingJackson2HttpMessageConverter.class.isAssignableFrom(converterType);
+        return MappingJackson2HttpMessageConverter.class.isAssignableFrom(converterType)
+            && returnType.getDeclaringClass().getName().startsWith(PROJECT_BASE_PACKAGE)
+            && !this.getClass().isAssignableFrom(returnType.getDeclaringClass());
     }
 
     @Override
-    public Object beforeBodyWrite(Object resultData, MethodParameter methodParameter, MediaType mediaType,
+    public Object beforeBodyWrite(@Nullable Object resultData, MethodParameter methodParameter, MediaType mediaType,
                                   Class<? extends HttpMessageConverter<?>> clazz, ServerHttpRequest serverHttpRequest,
                                   ServerHttpResponse serverHttpResponse) {
 
+        if (null == resultData) {
+            return JsonResult.buildSuccess();
+        }
         if (resultData instanceof MappingJacksonValue) {
             MappingJacksonValue result = (MappingJacksonValue) resultData;
             Object body = result.getValue();

@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import javax.validation.Valid;
 
 /**
  * demo controller.
@@ -45,7 +46,7 @@ public class DemoController {
      * @param id id for order
      * @return {@link TradeOrder}
      */
-    @GetMapping("order/{id}")
+    @GetMapping("order/{id:\\d+}")
     public TradeOrder queryOrder(@PathVariable("id") int id) throws DemoException {
         return orderService.queryOrder(id);
     }
@@ -58,7 +59,7 @@ public class DemoController {
      * @throws DemoException throw when error occur
      */
     @PutMapping("order")
-    public TradeOrder addOrder(@RequestBody TradeOrder tradeOrder) throws DemoException {
+    public TradeOrder addOrder(@Valid @RequestBody TradeOrder tradeOrder) throws DemoException {
         return orderService.addOrder(tradeOrder);
     }
 
@@ -70,7 +71,7 @@ public class DemoController {
      * @return modified {@link TradeOrder}
      * @throws DemoException throw when error occur
      */
-    @PostMapping("order/{id}")
+    @PostMapping("order/{id:\\d+}")
     public TradeOrder modifyOrder(@PathVariable("id") int id, @RequestBody TradeOrder tradeOrder) throws DemoException {
         tradeOrder.setId(id);
         return orderService.modifyOrder(tradeOrder);

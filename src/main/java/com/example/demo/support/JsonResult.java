@@ -81,6 +81,14 @@ final class JsonResult {
     }
 
     /**
+     * return an empty success result.
+     * @return {@link JsonResult}
+     */
+    static JsonResult buildSuccess() {
+        return new JsonResult(CODE_SUCCESS, MSG_SUCCESS, new EmptyObject());
+    }
+
+    /**
      * EmptyObject.
      *
      * @author yuan.cheng

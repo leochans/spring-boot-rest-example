@@ -72,10 +72,10 @@ public class DemoControllerTest {
     public void addOrder() throws Exception {
         when(orderService.addOrder(ArgumentMatchers.any(TradeOrder.class)))
             .thenThrow((new DemoException(100, "add order error")));
-        this.mockMvc.perform(put("/order").contentType(MediaType.APPLICATION_JSON).content("{\"id\":0}"))
+        this.mockMvc.perform(put("/order").contentType(MediaType.APPLICATION_JSON).content("{\"id\":0,\"summary\":\"hello\",\"type\":\"BUY\"}"))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-            .andExpect(content().json("{\"code\":0,\"msg\":\"success\",\"data\":{}}"));
+            .andExpect(content().json("{\"code\":100,\"msg\":\"add order error\",\"data\":{}}"));
     }
 
     @Test
@@ -152,6 +152,9 @@ public class DemoControllerTest {
     @Test
     public void statusTest() throws Exception {
         this.mockMvc.perform(get("/status"))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value(0))
+            .andExpect(jsonPath("$.msg").value("success"))
+            .andExpect(jsonPath("$.data").isEmpty());
     }
 }
