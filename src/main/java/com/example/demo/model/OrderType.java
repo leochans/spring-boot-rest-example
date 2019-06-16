@@ -6,12 +6,8 @@ package com.example.demo.model;
  * @author yuan.cheng
  */
 public enum OrderType {
-    /**
-     * buy.
-     */
-    BUY,
-    /**
-     * sell.
-     */
-    SELL
+  /** buy. */
+  BUY,
+  /** sell. */
+  SELL
 }

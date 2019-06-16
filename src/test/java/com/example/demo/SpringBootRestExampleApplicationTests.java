@@ -13,12 +13,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class SpringBootRestExampleApplicationTests {
 
-    @Autowired
-    private DemoController demoController;
+  @Autowired private DemoController demoController;
 
-    @Test
-    public void contextLoads() {
-        assertThat(demoController).isNotNull();
-    }
-
+  @Test
+  public void contextLoads() {
+    assertThat(demoController).isNotNull();
+  }
 }

@@ -1,1 +1,12 @@
-{"code":0,"msg":"success","data":{"id":1,"summary":"demo tradeOrder","price":null,"amount":null,"date":"2019-03-14T07:58:19.111","type":"SELL"}}
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "id": 1,
+    "summary": "demo tradeOrder",
+    "price": null,
+    "amount": null,
+    "date": "2019-03-14T07:58:19.111",
+    "type": "SELL"
+  }
+}
